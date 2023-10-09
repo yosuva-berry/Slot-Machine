@@ -16,6 +16,27 @@ symbol_count = {
     "D": 8
 }
 
+symbol_values = {
+    "A": 5,
+    "B": 4,
+    "C": 3,
+    "D": 2
+}
+
+def check_winnings(columns, lines, bet, values):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winnings += values[symbol] + bet
+            winning_lines.append(line + 1)
+    return winnings, winning_lines
+
 def deposit():
     while True:
         amount = input("What would you like to deposit? $")
@@ -67,21 +88,25 @@ def get_slot_machine_spin(rows,cols,symbols):
     columns = []
     for _ in range(cols):
         column = []
-        current_symbol = all_symbols[:]  # string slicing - instead of making a reference to the variable, we just copy the string from the variable to variable 
+        current_symbol = all_symbols[:]
         for _ in range(rows):
             value = random.choice(all_symbols)
             current_symbol.remove(value)
             column.append(value)
         
         columns.append(column)
-    
     return columns
 
 def print_slot_machines(columns):
-    pass
+    for row in range(len(columns[0])):
+        for i, column in enumerate(columns):
+            if i != len(columns) - 1:
+                print(column[row], end = " | ")
+            else:
+                print(column[row],end="")
+        print()
 
-def main():
-    balance = deposit()
+def spin(balance):
     lines = get_number_of_lines()
 
     while True:
@@ -93,7 +118,26 @@ def main():
         else:
             break
 
-    print(f"You are betting ${bet} on ${lines} lines. Total bet is equal to : ${total_bet}")
+    print(f"You are betting ${bet} on {lines} lines. Total bet is equal to : ${total_bet}")
+
+    slots = get_slot_machine_spin(ROWS,COLS,symbol_count)
+    print_slot_machines(slots)
+    winnings , winning_lines = check_winnings(slots, lines, bet, symbol_values)
+    print(F"You won ${winnings}.")
+    print(F"you won on lines", *winning_lines)
+    return winnings - total_bet
+
+def main():
+    balance = deposit()
+    while True:
+        print(f"Current Balance is: ${balance}")
+        result = input("Press Enter to Play (q to quit)")
+        if result == 'q':
+            break
+        balance += spin(balance)
+
+    print(f"You left with ${balance}")
+
 
 
 main()
